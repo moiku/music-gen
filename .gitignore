@@ -7,3 +7,4 @@ models/
 output/
 vendor/
 CLAUDE.local.md
+musicgen.local.env

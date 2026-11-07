@@ -20,7 +20,7 @@
 ## 使い方（ギャラリー）
 
 ```bash
-uv run python -m musicgen.server --host <待ち受けるIP> --port 8890
+./mg start | stop | restart | status | log   # 待ち受けるアドレスは musicgen.local.env（git の管理外）
 ```
 
 - **画面でできること**: 新規作成（曲のイメージから AI が設定を自動入力）、修正版を作成、試聴、評価（★）、お気に入り、メモ、書き出し（フル・ショート・ループ・ステム・テンポ確認。M4A と WAV）、バリエーションを作成、長さを変えて作成。

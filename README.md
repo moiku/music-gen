@@ -51,10 +51,14 @@ API キーは `~/.secrets/api_keys.env` に `ANTHROPIC_API_KEY=...` と書くか
 ## 使い方
 
 ```bash
-uv run python -m musicgen.server --host 127.0.0.1 --port 8890
+./mg start     # バックグラウンドで起動して URL を表示
+./mg stop      # 停止（AIモデルのメモリも解放）
+./mg status    # 状態を確認（restart / log もある）
 ```
 
-ブラウザで `http://127.0.0.1:8890/` を開きます。ほかの端末から使う場合は、VPN（Tailscale など）のアドレスで待ち受けてください。このサーバーには認証がないので、インターネットに直接公開しないでください。
+起動したら、ブラウザで表示された URL（既定は `http://127.0.0.1:8890/`）を開きます。
+
+ほかの端末から使う場合は、`musicgen.local.env`（git の管理外）に、VPN（Tailscale など）のアドレスを `MUSICGEN_HOST=...` と書きます。ポートは `MUSICGEN_PORT=...` で変えられます。このサーバーには認証がないので、インターネットに直接公開しないでください。
 
 作った曲は `output/library/` に保存されます。保存先は `MUSICGEN_LIBRARY` で変えられます。
 
