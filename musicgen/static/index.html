@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BGM ギャラリー</title>
+<style>
+:root{--bg:#f7f7f5;--card:#fff;--ink:#1d1d1f;--sub:#6b6b70;--line:#e3e3e0;--acc:#2f6fdf;--ok:#1f8a4c;--ng:#c0392b;--warn:#b7791f;--chip:#eef1f6}
+@media (prefers-color-scheme:dark){:root{--bg:#141416;--card:#1e1e21;--ink:#ececee;--sub:#9a9aa2;--line:#2d2d31;--acc:#6ea0ff;--ok:#4cc27e;--ng:#ff6b5b;--warn:#e0b04a;--chip:#2a2d34}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Hiragino Sans",sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+h1{font-size:17px;margin:0;margin-right:auto}
+main{max-width:980px;margin:0 auto;padding:12px 16px 80px}
+button,select,input,textarea{font:inherit;color:inherit}
+button{background:var(--chip);border:1px solid var(--line);border-radius:8px;padding:5px 10px;cursor:pointer}
+button.primary{background:var(--acc);color:#fff;border-color:var(--acc)}
+button:disabled{opacity:.5;cursor:default}
+input,select,textarea{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:5px 8px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+label{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--sub)}
+label.inline{flex-direction:row;align-items:center;gap:6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.chips button{font-size:13px;padding:3px 9px;border-radius:99px}
+.hint{font-size:12px;color:var(--sub)}
+.jobs{font-size:13px;color:var(--sub)}
+.job{display:flex;gap:8px;align-items:center}
+.bar{height:4px;background:var(--line);border-radius:2px;flex:1;max-width:160px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--acc)}
+.req h2{font-size:15px;margin:0 0 2px}
+.req .meta{font-size:12px;color:var(--sub);margin-bottom:8px}
+.req details{font-size:12px;color:var(--sub);margin-bottom:6px}
+.take{border-top:1px solid var(--line);padding:10px 0;display:grid;gap:6px}
+.take.archived{opacity:.45}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+audio{height:34px;width:100%;max-width:420px}
+.badge{font-size:12px;padding:1px 7px;border-radius:99px;border:1px solid var(--line)}
+.badge.ok{color:var(--ok);border-color:var(--ok)}
+.badge.ng{color:var(--ng);border-color:var(--ng)}
+.stars button{background:none;border:none;padding:0 1px;font-size:19px;color:var(--line)}
+.stars button.on{color:#f5b301}
+.fav{background:none;border:none;font-size:19px;padding:0 4px;color:var(--line)}
+.fav.on{color:#e0245e}
+.note{flex:1;min-width:180px}
+.finals{display:grid;gap:4px;padding-left:10px;border-left:3px solid var(--line)}
+.finals .row span{min-width:110px;font-size:13px;color:var(--sub)}
+.small{font-size:12px;color:var(--sub)}
+.empty{color:var(--sub);text-align:center;padding:30px}
+</style>
+</head>
+<body>
+<header>
+  <h1>BGM ギャラリー</h1>
+  <label class="inline"><input type="checkbox" id="fFav"> お気に入り</label>
+  <label class="inline"><input type="checkbox" id="fOk"> チェックOKのみ</label>
+  <label class="inline">評価<select id="fRate"><option value="0">すべて</option><option value="1">★1以上</option><option value="2">★2以上</option><option value="3">★3以上</option><option value="4">★4以上</option><option value="5">★5</option></select></label>
+  <label class="inline"><input type="checkbox" id="fArc"> アーカイブを表示</label>
+  <button id="toggleNew" class="primary">＋ 新規作成</button>
+</header>
+<main>
+  <section class="panel" id="newPanel" hidden>
+    <label>曲のイメージ（AI が下の設定を自動で入力します）
+      <textarea id="words" rows="2" placeholder="例：カフェの朝の雰囲気で、落ち着いたアコースティック。ストーリーズ用。少しだけ和の音を入れたい"></textarea></label>
+    <p><button id="interpret">設定を自動入力</button> <span id="explain" class="hint"></span></p>
+    <div class="chips" id="presets"></div>
+    <div class="grid">
+      <label>タイトル<input id="title" placeholder="例：カフェの朝"></label>
+      <label>終わり方<select id="ending"></select></label>
+      <label>長さ（秒）<input id="seconds" type="number" min="5" max="180" step="1" value="15"></label>
+      <label>BPM<input id="bpm" type="number" min="60" max="180" step="1" value="96"></label>
+      <label>調（空欄=おまかせ）<select id="key"><option value="">おまかせ</option></select></label>
+      <label>作成数<input id="n" type="number" min="1" max="12" value="4"></label>
+    </div>
+    <p class="hint" id="barsHint"></p>
+    <label>プロンプト（雰囲気・楽器。英語推奨。下のボタンでも追加できます）
+      <textarea id="caption" rows="3" placeholder="Bright, warm acoustic pop with ukulele and light claps"></textarea></label>
+    <div class="chips" id="chips"></div>
+    <label class="inline"><input type="checkbox" id="wa"> 和楽器を少し混ぜる（箏・尺八風の笛・小さな太鼓）</label>
+    <p><button class="primary" id="submit">作成する</button> <span class="hint">1曲あたり約40〜60秒。初回はAIモデルの読み込みに約1分かかります。</span></p>
+  </section>
+  <section class="jobs" id="jobs"></section>
+  <section id="lib"></section>
+</main>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const CHIPS = {
+  "明るい":"bright, uplifting", "温かい":"warm, cozy", "おしゃれ":"stylish, modern, chic",
+  "落ち着いた":"calm, relaxed", "ローファイ":"lo-fi hip hop, dusty Rhodes, soft boom bap drums",
+  "アコースティック":"acoustic guitar, light percussion", "ピアノ":"gentle piano",
+  "シネマ":"cinematic strings, wide reverb", "エレクトロ":"clean synth arpeggios, punchy tight drums",
+  "トロピカル":"tropical house, marimba, deep bass", "ジャズ":"jazzy, upright bass, brushed drums",
+  "かわいい":"playful, cute, glockenspiel and ukulele"};
+const KEYS = ["C major","D major","E major","F major","G major","A major","B♭ major","A minor","D minor","E minor","C minor","F# minor"];
+let ENDINGS = {}, LIB = [], lastDone = "";
+
+async function api(path, body) {
+  const r = await fetch(path, body === undefined ? {} : {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)});
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+function pref(k, v) { try { if (v === undefined) return localStorage.getItem("mg:"+k); localStorage.setItem("mg:"+k, v); } catch(e) {} }
+
+// ---------- new request ----------
+function barsHint() {
+  const s = +$("#seconds").value, b = +$("#bpm").value; if (!s || !b) return;
+  const bar = 240 / b, bars = Math.max(1, Math.round(s / bar));
+  $("#barsHint").textContent = `→ ${bars} 小節 = ${(bars*bar).toFixed(2)} 秒（ループや編集のため、長さは小節単位にそろえます）`;
+}
+async function setupForm() {
+  const P = await api("/api/presets"); ENDINGS = P.endings;
+  $("#ending").innerHTML = Object.entries(ENDINGS).map(([k,l]) => `<option value="${k}">${esc(l)}</option>`).join("");
+  $("#presets").innerHTML = P.presets.map((p,i) => `<button type="button" data-p="${i}">${esc(p.label)}</button>`).join("");
+  $("#presets").onclick = e => { const p = P.presets[e.target.dataset.p]; if (!p) return;
+    $("#seconds").value = p.seconds; $("#ending").value = p.ending; barsHint(); };
+  $("#key").innerHTML += KEYS.map(k => `<option>${k}</option>`).join("");
+  $("#chips").innerHTML = Object.keys(CHIPS).map(k => `<button type="button" data-c="${esc(k)}">${esc(k)}</button>`).join("");
+  $("#chips").onclick = e => { const k = e.target.dataset.c; if (!k) return;
+    const t = $("#caption"); t.value = (t.value.trim() ? t.value.trim() + ", " : "") + CHIPS[k]; };
+  $("#seconds").oninput = $("#bpm").oninput = barsHint; barsHint();
+  $("#toggleNew").onclick = () => { $("#newPanel").hidden = !$("#newPanel").hidden; };
+  let interp = {order_text: "", explanation: ""};
+  $("#interpret").onclick = async () => {
+    const text = $("#words").value.trim(); if (!text) return;
+    $("#interpret").disabled = true; $("#explain").textContent = "入力中…";
+    try {
+      const p = await api("/api/interpret", {text});
+      $("#title").value = p.title; $("#ending").value = p.ending; $("#seconds").value = p.seconds;
+      $("#bpm").value = p.bpm; $("#caption").value = p.caption; $("#wa").checked = p.wa; $("#n").value = p.n;
+      if (p.key && ![...$("#key").options].some(o => o.value === p.key)) $("#key").innerHTML += `<option>${esc(p.key)}</option>`;
+      $("#key").value = p.key || ""; barsHint();
+      interp = {order_text: text, explanation: p.explanation};
+      $("#explain").textContent = p.explanation + "（内容を確認して「作成する」を押してください）";
+    } catch (e) { $("#explain").textContent = "エラー：" + e.message; }
+    finally { $("#interpret").disabled = false; }
+  };
+  $("#submit").onclick = async () => {
+    $("#submit").disabled = true;
+    try {
+      await api("/api/requests", {title:$("#title").value, ending:$("#ending").value, seconds:+$("#seconds").value,
+        bpm:+$("#bpm").value, key:$("#key").value, caption:$("#caption").value, wa:$("#wa").checked, n:+$("#n").value,
+        ...($("#words").value.trim() === interp.order_text ? interp : {})});
+      $("#words").value = ""; $("#explain").textContent = ""; interp = {order_text: "", explanation: ""};
+      $("#newPanel").hidden = true; pollJobs(); loadLib();
+    } catch (e) { alert(e.message); } finally { $("#submit").disabled = false; }
+  };
+}
+
+// ---------- jobs ----------
+async function pollJobs() {
+  try {
+    const {worker_running, jobs} = await api("/api/jobs");
+    const act = jobs.filter(j => j.status === "queued" || j.status === "running");
+    const err = jobs.filter(j => j.status === "error").slice(0, 1);
+    $("#jobs").innerHTML = (worker_running ? "● AIモデル：読み込み済み（10分使わないと自動で解放）" : "○ AIモデル：停止中（作成時に自動で起動）")
+      + act.map(j => `<div class="job">${j.kind === "generate" ? "作成" : "書き出し"}：${esc(j.message || "待機中")}
+         <span class="bar"><i style="width:${Math.round((j.progress||0)*100)}%"></i></span></div>`).join("")
+      + err.map(j => `<div class="job" style="color:var(--ng)">エラー：${esc(j.message)}</div>`).join("");
+    const sig = jobs.filter(j => j.status === "done").map(j => j.id).join() + act.map(j => j.message).join();
+    if (sig !== lastDone) { lastDone = sig; loadLib(); }
+  } catch (e) {}
+}
+
+// ---------- library ----------
+function badges(t) {
+  const v = t.verdict, a = t.analysis;
+  if (!v) return `<span class="badge">${t.status === "generating" ? "作成中…" : "チェック中…"}</span>`;
+  const b = (ok, txt, tip) => `<span class="badge ${ok ? "ok" : "ng"}" title="${esc(tip)}">${ok ? "✓" : "✗"} ${txt}</span>`;
+  return [
+    b(v.on_grid, `拍 ${a.grid_ms.map(x => (x > 0 ? "+" : "") + Math.round(x)).join("/")}ms`, "拍の格子とのずれ（序盤/中盤/終盤）"),
+    b(v.starts_at_0, "頭から鳴る", "0秒から音が出ているか"),
+    b(v.fills_length, `${a.end_s}s まで鳴る`, "曲が早く終わっていないか"),
+    b(v.mono_safe, "モノラルOK", "スマホのスピーカーで打ち消し合わないか"),
+    a.stretch !== 1 ? `<span class="badge" title="テンポを補正した倍率">伸縮 ×${a.stretch}</span>` : "",
+  ].join(" ");
+}
+const FINAL_LABEL = {full:"フル", short:"ショート", loop_x3:"ループ（3回再生）", click:"テンポ確認（クリック付き）", stem_drums:"ステム：ドラム", stem_bass:"ステム：ベース", stem_other:"ステム：その他"};
+
+function takeHTML(t, req) {
+  const base = `/files/${req.id}/${t.id}/`;
+  const stars = [1,2,3,4,5].map(i => `<button data-act="rate" data-v="${i}" class="${i <= (t.rating||0) ? "on" : ""}">★</button>`).join("");
+  // download links: M4A first (phones / Instagram), WAV for editing; loop_x3 plays only, links point at the loop itself
+  const dl = (k, f) => { const F = t.final.files, key = k === "loop_x3" ? "loop" : k;
+    const m4a = F[key + "_m4a"], wav = F[key] || f;
+    return (m4a ? `<a class="small" href="${base}${m4a}" download>M4A</a> ` : "") + `<a class="small" href="${base}${wav}" download>WAV</a>`; };
+  const fin = t.final ? `<div class="finals">${Object.entries(t.final.files).filter(([k]) => FINAL_LABEL[k]).map(([k,f]) =>
+      `<div class="row"><span>${FINAL_LABEL[k]}</span><audio controls preload="none" src="${base}${t.final.files[k + "_m4a"] || f}"></audio>${dl(k, f)}</div>`).join("")}
+      <div class="small">M4A（AAC 256kbps）はスマホ・Instagram 用、WAV は動画編集・CM 用</div>
+      ${t.final.loop_seam_jump_db !== undefined ? `<div class="small">ループのつなぎ目の段差 ${t.final.loop_seam_jump_db} dB（小さいほど自然）</div>` : ""}</div>` : "";
+  const ready = !!t.verdict;
+  return `<div class="take ${t.archived ? "archived" : ""}" data-id="${t.id}">
+    <div class="row"><b class="small">${esc(t.id)}</b> ${t.parent ? `<span class="small">派生元：${esc(t.parent)}</span>` : ""}
+      <span class="small">seed ${t.seed}${t.gen_s ? ` · ${t.gen_s}s` : ""}</span></div>
+    ${ready ? `<audio controls preload="none" src="${base}take.wav"></audio>` : ""}
+    <div class="row">${badges(t)}</div>
+    ${ready ? `<div class="row"><span class="stars">${stars}</span>
+      <button class="fav ${t.fav ? "on" : ""}" data-act="fav" title="お気に入り">♥</button>
+      <input class="note" data-act="note" value="${esc(t.note)}" placeholder="メモ"></div>
+    <div class="row">
+      <button data-act="finish">書き出し</button>
+      <label class="inline small"><input type="checkbox" data-ver="stems"> ステムも</label>
+      <button data-act="more">バリエーションを作成</button>
+      <select data-act="len"><option value="">長さを変えて作成…</option><option value="7">7秒</option><option value="15">15秒</option><option value="30">30秒</option><option value="60">60秒</option></select>
+      <button data-act="archive">${t.archived ? "アーカイブ解除" : "アーカイブ"}</button>
+    </div>
+    <div class="row"><input class="note" data-words placeholder="修正の指示（例：テンポを落として尺八を目立たせて）">
+      <button data-act="refine">修正版を作成</button></div>` : ""}
+    ${fin}
+  </div>`;
+}
+
+function render() {
+  const fFav = $("#fFav").checked, fOk = $("#fOk").checked, fRate = +$("#fRate").value, fArc = $("#fArc").checked;
+  const keep = t => (fArc || !t.archived) && (!fFav || t.fav) && (!fOk || t.verdict?.ok) && (t.rating||0) >= fRate;
+  const html = LIB.map(req => {
+    const items = req.items.filter(keep); if (!items.length) return "";
+    const end = req.ending || ({stories:"loop", reels:"loop", cm:"button", free:"auto"})[req.purpose] || "auto";
+    const p = "終わり方：" + (ENDINGS[end] || end);
+    return `<section class="panel req"><h2>${esc(req.title || "（無題）")}</h2>
+      <div class="meta">${esc(p)} · ${req.bpm} BPM · ${req.bars} 小節 = ${req.seconds}s${req.key ? " · " + esc(req.key) : ""}${req.wa ? " · 和楽器" : ""} · ${new Date(req.created*1000).toLocaleString("ja-JP")}</div>
+      ${req.order_text ? `<div class="small">イメージ：「${esc(req.order_text)}」</div>` : ""}
+      ${req.explanation ? `<div class="small">AIの設定メモ：${esc(req.explanation)}</div>` : ""}
+      <details><summary>プロンプト</summary>${esc(req.caption || "（なし）")}</details>
+      ${items.map(t => takeHTML(t, req)).join("")}</section>`;
+  }).join("");
+  $("#lib").innerHTML = html || `<p class="empty">まだ曲がありません。「＋ 新規作成」から作成してください。</p>`;
+}
+// Re-render only when data changed, and never while audio plays or a note is being typed
+// (a re-render would stop playback / drop the cursor). Deferred renders run on pause/blur.
+let libSig = "", pending = false;
+const busy = () => [...document.querySelectorAll("#lib audio")].some(a => !a.paused)
+  || (document.activeElement && document.activeElement.closest("#lib") && document.activeElement.tagName === "INPUT");
+async function loadLib(force) {
+  const data = await api("/api/library"), sig = JSON.stringify(data);
+  if (sig === libSig && !force) return;
+  libSig = sig; LIB = data;
+  if (busy()) { pending = true; return; }
+  render();
+}
+const flush = () => setTimeout(() => { if (pending && !busy()) { pending = false; render(); } }, 50);
+$("#lib").addEventListener("pause", flush, true);
+$("#lib").addEventListener("ended", flush, true);
+$("#lib").addEventListener("focusout", flush, true);
+
+$("#lib").addEventListener("click", async e => {
+  const b = e.target.closest("[data-act]"); if (!b || b.tagName === "INPUT" || b.tagName === "SELECT") return;
+  const id = b.closest(".take").dataset.id, act = b.dataset.act;
+  const t = LIB.flatMap(r => r.items).find(x => x.id === id);
+  // rating / fav: update in place (no re-render, so playback continues)
+  if (act === "rate" || act === "fav") {
+    const body = act === "rate" ? {rating: +b.dataset.v === t.rating ? 0 : +b.dataset.v} : {fav: !t.fav};
+    const meta = await api(`/api/items/${id}/rate`, body);
+    Object.assign(t, meta);
+    const el = b.closest(".take");
+    el.querySelectorAll(".stars button").forEach(s => s.classList.toggle("on", +s.dataset.v <= (t.rating||0)));
+    el.querySelector(".fav").classList.toggle("on", !!t.fav);
+    libSig = ""; return;
+  }
+  if (act === "archive") await api(`/api/items/${id}/rate`, {archived: !t.archived});
+  if (act === "finish") { const stems = b.closest(".take").querySelector("[data-ver=stems]").checked;
+    await api(`/api/items/${id}/finish`, {versions: ["full","short","loop", ...(stems ? ["stems"] : [])]}); }
+  if (act === "more") await api(`/api/items/${id}/more`, {n: 4});
+  if (act === "refine") {
+    const box = b.closest(".take").querySelector("[data-words]"), text = box.value.trim(); if (!text) return;
+    b.disabled = true; b.textContent = "設定を作成中…";
+    try { const r = await api(`/api/items/${id}/refine`, {text}); alert("AIの設定メモ：" + r.interpretation.explanation + "\n作成を開始しました。"); }
+    catch (e) { alert(e.message); } finally { b.disabled = false; b.textContent = "修正版を作成"; }
+  }
+  pollJobs(); loadLib();
+});
+$("#lib").addEventListener("change", async e => {
+  const el = e.target, take = el.closest(".take"); if (!take) return;
+  if (el.dataset.act === "note") {
+    const t = LIB.flatMap(r => r.items).find(x => x.id === take.dataset.id);
+    Object.assign(t, await api(`/api/items/${take.dataset.id}/rate`, {note: el.value})); libSig = ""; }
+  if (el.dataset.act === "len" && el.value) { await api(`/api/items/${take.dataset.id}/more`, {n: 4, seconds: +el.value}); pollJobs(); loadLib(); }
+});
+for (const id of ["fFav","fOk","fRate","fArc"]) { const el = $("#"+id);
+  const v = pref(id); if (v !== null) el.type === "checkbox" ? el.checked = v === "1" : el.value = v;
+  el.onchange = () => { pref(id, el.type === "checkbox" ? (el.checked ? "1" : "0") : el.value); render(); }; }
+
+setupForm().then(loadLib); pollJobs(); setInterval(pollJobs, 2500);
+</script>
+</body>
+</html>

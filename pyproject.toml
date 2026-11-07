@@ -1,0 +1,17 @@
+[project]
+name = "music-gen"
+version = "0.1.0"
+description = "Local BGM generator for short videos and commercials (ACE-Step 1.5 on Apple Silicon) with a browser gallery"
+requires-python = ">=3.13"
+dependencies = [
+    "anthropic>=2.6.0",
+    "demucs>=4.0.1",
+    "fastapi>=0.162.0",
+    "librosa>=1.0.0",
+    "numpy>=2.4.3",
+    "pedalboard>=0.9.26",
+    "pyloudnorm>=0.2.0",
+    "python-dotenv>=1.2.4",
+    "soundfile>=0.14.0",
+    "uvicorn[standard]>=0.54.0",
+]

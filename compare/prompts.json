@@ -1,0 +1,18 @@
+{
+  "seconds": 30,
+  "seeds": [11, 22],
+  "prompts": [
+    {"id": "corporate", "bpm": 118, "key": "C major",
+     "caption": "Uplifting corporate pop, bright acoustic guitar strums, light claps and percussion, warm synth pads, optimistic and modern, instrumental"},
+    {"id": "lofi", "bpm": 85, "key": "F major",
+     "caption": "Chill lo-fi hip hop, mellow Rhodes electric piano, dusty vinyl texture, soft boom bap drums, relaxed cafe mood, instrumental"},
+    {"id": "cinematic", "bpm": 90, "key": "D minor",
+     "caption": "Emotional cinematic piano with lush string ensemble, slow build, wide reverb, hopeful and touching, instrumental"},
+    {"id": "tropical", "bpm": 110, "key": "A minor",
+     "caption": "Tropical house, plucked marimba melody, deep bass, four-on-the-floor kick, summer beach vibe, instrumental"},
+    {"id": "folk", "bpm": 100, "key": "G major",
+     "caption": "Warm acoustic folk, fingerpicked guitar, ukulele, glockenspiel accents, gentle hand percussion, cozy lifestyle vlog, instrumental"},
+    {"id": "tech", "bpm": 124, "key": "E minor",
+     "caption": "Minimal modern electronic, clean synth arpeggios, punchy tight drums, sleek technology product commercial, instrumental"}
+  ]
+}
